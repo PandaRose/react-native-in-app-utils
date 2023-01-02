@@ -8,12 +8,14 @@
 {
     NSArray *products;
     NSMutableDictionary *_callbacks;
+    NSMutableDictionary *_requests;
 }
 
 - (instancetype)init
 {
     if ((self = [super init])) {
         _callbacks = [[NSMutableDictionary alloc] init];
+        _requests = [[NSMutableDictionary alloc] init];
         [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
     }
     return self;
@@ -106,6 +108,7 @@ RCT_EXPORT_METHOD(purchaseProduct:(NSString *)productIdentifier
         }
         [[SKPaymentQueue defaultQueue] addPayment:payment];
         _callbacks[payment.productIdentifier] = callback;
+        _requests[payment.productIdentifier] = payment;
     } else {
         callback(@[@"invalid_product"]);
     }
@@ -181,6 +184,7 @@ RCT_EXPORT_METHOD(loadProducts:(NSArray *)productIdentifiers
                                           initWithProductIdentifiers:[NSSet setWithArray:productIdentifiers]];
     productsRequest.delegate = self;
     _callbacks[RCTKeyForInstance(productsRequest)] = callback;
+    _requests[RCTKeyForInstance(productsRequest)] = productsRequest;
     [productsRequest start];
 }
 
